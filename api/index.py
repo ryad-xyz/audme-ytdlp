@@ -7,7 +7,7 @@ app = Flask(__name__)
 def home():
   return jsonify({
     "status": "online",
-    "message": "Server yt-dlp Papah Siap Mengekstrak Data!"
+    "message": "RYAD - AUDME!"
   })
 
 @app.route('/api/extract')
