@@ -24,7 +24,7 @@ def extract_data():
     'no_cache_dir': True,
     'format': 'bestaudio/best', # Ambil kualitas audio terbaik
     # Ini senjata rahasianya: Menyamar sebagai aplikasi Android & Mobile Web
-    'extractor_args': {'youtube': ['player_client=android,mweb']}
+    'extractor_args': {'youtube': ['player_client=tv,ios']}
   }
 
   try:
