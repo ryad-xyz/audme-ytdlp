@@ -12,33 +12,37 @@ def home():
 
 @app.route('/api/extract')
 def extract_data():
-  # URL bisa berupa link video tunggal, link playlist, atau link channel
   url = request.args.get('url')
   
   if not url:
     return jsonify({"error": "Parameter 'url' wajib diisi"}), 400
 
-  # Konfigurasi sakti untuk yt-dlp di Vercel (Serverless)
+  # KONFIGURASI SAKTI UNTUK BYPASS ANTI-BOT YOUTUBE
   ydl_opts = {
-    'quiet': True,             # Jangan tampilkan log di console
-    'skip_download': True,     # PENTING: Jangan download videonya!
-    'extract_flat': True,      # Jika URL berupa channel/playlist, cukup ambil judul & ID-nya saja agar cepat
-    'no_cache_dir': True,      # Mencegah error folder Read-Only di Vercel
-    'format': 'bestaudio/best' # Persiapan jika papah mau ambil URL mentah (raw audio stream)
+    'quiet': True,
+    'skip_download': True,
+    'no_cache_dir': True,
+    'format': 'bestaudio/best', # Ambil kualitas audio terbaik
+    # Ini senjata rahasianya: Menyamar sebagai aplikasi Android & Mobile Web
+    'extractor_args': {'youtube': ['player_client=android,mweb']}
   }
 
   try:
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-      # Jalankan proses ekstraksi metadata
+      # Jalankan ekstraksi secara penuh untuk mendapatkan raw stream URL
       info = ydl.extract_info(url, download=False)
       
-      # Menghilangkan beberapa properti bawaan yt-dlp yang terlalu panjang (opsional)
-      if 'formats' in info and ydl_opts.get('extract_flat'):
-         del info['formats']
+      # Kita filter hasilnya agar JSON tidak kepanjangan dan berat
+      # Hanya ambil judul dan URL googlevideo mentahnya saja
+      raw_url = info.get('url', None)
+      title = info.get('title', 'Unknown Title')
 
       return jsonify({
         "status": "success",
-        "data": info
+        "data": {
+          "title": title,
+          "url": raw_url
+        }
       })
       
   except Exception as e:
@@ -46,5 +50,3 @@ def extract_data():
       "status": "error",
       "message": str(e)
     }), 500
-
-# Wajib ada agar dibaca oleh Vercel
